@@ -30,7 +30,7 @@ public class ReadFromHDFS {
     public static void main(String[] args) throws IOException, URISyntaxException {
 
         ExecuteImageDetection pyInstance = new ExecuteImageDetection();
-        String uri = "hdfs://localhost:9000/imagefiles";
+        String uri = "hdfs://localhost:9000/monk";
         Configuration config  = new Configuration();
         Path path = new Path(uri);
         SequenceFile.Reader reader = null;
@@ -40,8 +40,8 @@ public class ReadFromHDFS {
         try{
             reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(path));
 
-            Text value = new Text();
-            BytesWritable key = new BytesWritable();
+            Text key = new Text();
+            BytesWritable value = new BytesWritable();
 
             while(reader.next(key, value)){
                 //System.out.println("key: "+key+" value: "+value);
@@ -49,6 +49,8 @@ public class ReadFromHDFS {
                 pyInstance.runPython(imageAsByteArray, value.toString());
                 BufferedImage restoredImage = ImageIO.read(new ByteArrayInputStream(imageAsByteArray));
 
+
+                //Thread.sleep(10000);
                 /*
                 Call if u want to see the restored images from hdfs but VM will die
                  */

@@ -35,23 +35,23 @@ public class SequenceFileCreator
 
         Configuration config = new Configuration();
 
-        BytesWritable key = new BytesWritable();
-        Text value = new Text();
+        BytesWritable value = new BytesWritable();
+        Text key = new Text();
 
         FileSystem fs = FileSystem.get(URI.create(outputPath), config);
 
         SequenceFile.Writer writer = null;
 
         try{
-            writer = SequenceFile.createWriter(fs, config, new Path(outputPath), key.getClass(), value.getClass());
+            writer = SequenceFile.createWriter(fs, config, new Path(outputPath), key.getClass(),value.getClass());
             final File dir = new File(pathToRead);
             for(final File imgFile : dir.listFiles()) {
 
-                value.set(imgFile.getName());
+                key.set(imgFile.getName());
 
                 byte[] data = Files.readAllBytes(Paths.get(pathToRead+imgFile.getName()));
 
-                key.set(data, 0, data.length);
+                value.set(data, 0, data.length);
 
                 writer.append(key, value);
             }
