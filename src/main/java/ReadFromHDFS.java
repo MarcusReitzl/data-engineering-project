@@ -26,7 +26,10 @@ import javax.swing.*;
 
 
 public class ReadFromHDFS {
+
     public static void main(String[] args) throws IOException, URISyntaxException {
+
+        ExecuteImageDetection pyInstance = new ExecuteImageDetection();
         String uri = "hdfs://localhost:9000/imagefiles";
         Configuration config  = new Configuration();
         Path path = new Path(uri);
@@ -41,8 +44,9 @@ public class ReadFromHDFS {
             BytesWritable key = new BytesWritable();
 
             while(reader.next(key, value)){
-                System.out.println("key: "+key+" value: "+value);
+                //System.out.println("key: "+key+" value: "+value);
                 byte [] imageAsByteArray = Arrays.copyOf(key.getBytes(), key.getLength());
+                pyInstance.runPython(imageAsByteArray, value.toString());
                 BufferedImage restoredImage = ImageIO.read(new ByteArrayInputStream(imageAsByteArray));
 
                 /*
