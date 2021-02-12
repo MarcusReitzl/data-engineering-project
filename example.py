@@ -9,55 +9,48 @@ from PIL import Image
 import psycopg2
 import pgservices
 
+def getImageInfo(im, camera, date):
+#TODO ins Json-File speichern, damit if else block wegfällt
+	if camera == 1:
+		leftside = (0, 0, 155, 288)
+		rightside = (140, 0, 352, 288)
+	elif camera == 2:
+		leftside = (0, 0, 380, 576)
+		rightside = (380, 0, 720, 576)
+	elif camera == 3:
+		leftside = (0, 0, 185, 288)
+		rightside = (185, 0, 352, 288)
+	elif camera == 4:
+		leftside = (0, 0, 166, 288)
+		rightside = (166, 0, 352, 288)
+	elif camera == 5:
+		leftside = (0, 0, 350, 576)
+		rightside = (350, 0, 720, 576)
+
+	leftImage = im.crop(leftside)
+	rightImage = im.crop(rightside)
+
+	vehiclesLeftSide = vehicleDetection(leftImage)
+	vehiclesRightSide = vehicleDetection(rightImage)
 
 
-
-
-def cropImage(im, leftside, rightside, camera, date, infoImages):
-
-	s1 = im.crop(leftside)
-	s2 = im.crop(rightside)
-
-	ps1 = s1.convert('RGB')
-	ps2 = s2.convert('RGB')
-
-	os1 = np.array(ps1)
-	os1 = os1[:, :, ::-1].copy() 
-
-	os2 = np.array(ps2)
-	os2 =  os2[:, :, ::-1].copy() 
-
-
-
-	#lefthalf
-	bbox1, label1, conf1 = cv.detect_common_objects(os1)
-	#righthalt
-	bbox2, label2, conf2 = cv.detect_common_objects(os2)
-
-	#bbox, label, conf = cv.detect_common_objects(im)
-
-	#overrided by each iteration
-	infoPerImage = {'camera':camera, 'leftvehicles':int(label1.count('car'))+int(label1.count('truck')), 'rightvehicles':int(label2.count('car'))+int(label2.count('truck')), 'timestamp':date}
+	infoPerImage = {'camera':camera, 'leftvehicles':vehiclesLeftSide, 'rightvehicles':vehiclesRightSide, 'timestamp':date}
 	
-	infoImages.append(infoPerImage)
-	
-	#print(dict)
+	return infoPerImage
 
-	#output_image = draw_bbox(im, bbox, label, conf)
-	#plt.imshow(output_image)
-	#plt.show()
+def vehicleDetection(image):
+	pImage = image.convert('RGB')
 
-	#print(filename+' Number of trucks in the image is '+str(label1.count('truck')))
-	#print(filename+' Number of cars in the image is '+ str(label1.count('car'))) 	
-	#print(filename+' Number of trucks in the image is '+str(label2.count('truck')))
-	#print(filename+' Number of cars in the image is '+ str(label2.count('car'))) 			
-	
+	oImage = np.array(pImage)
+	oImage = oImage[:, :, ::-1].copy()
 
+	bbox1, label1, conf1 = cv.detect_common_objects(oImage)
 
-def getInfoImages(infoImages):
-	directory = "/home/de/Project/archive/archive/cams/"
-	#directory = "/home/de/Project/Example_Python/"
-	
+	return int(label1.count('car'))+int(label1.count('truck'))
+
+def processImagesFromDirectory(directory):
+
+	imageInfoList = []
 
 	for filename in os.listdir(directory):
 		if filename.endswith(".jpg"):
@@ -76,34 +69,20 @@ def getInfoImages(infoImages):
 	    			print(e)
 	    			continue
 			
-			if camera == 1:
-				leftside = (0,0,155,288)
-				rightside = (140,0,352,288)
-			elif camera ==2:
-				leftside = (0,0,380,576)
-				rightside = (380,0,720,576)
-			elif camera == 3:
-				leftside = (0,0,185,288)
-				rightside = (185,0,352,288)
-			elif camera == 4:
-				leftside = (0,0,166,288)
-				rightside = (166,0,352,288)
-			elif camera == 5:
-				leftside = (0,0,350,576)
-				rightside = (350,0,720,576)
+
 			
-			cropImage(im, leftside, rightside, camera, date, infoImages)
-				
+			imageInfo = getImageInfo(im, camera, date)
+			print(imageInfo)
+			imageInfoList.append(imageInfo)
 		else:
 			continue
 
+	return imageInfoList
+	
 
-#print(InfoImages)		
 def insertDB():
 	for dict in sorted(infoImages, key = lambda i: i['camera']):
 		pgservices.insertCameraData(dict)
-
-
 
 def calcAverage(infoImages):
 	averages = []
@@ -116,28 +95,20 @@ def calcAverage(infoImages):
 		
 		
 def main():
-	pgservices.dropTables()
-	pgservices.createTableInfo()
+	##pgservices.dropTables()
+	##pgservices.createTableInfo()
 	#pgservices.selectTable()
 	#pgservices.selectTime()
-	infoImages = []
-	getInfoImages(infoImages)
+
+	infoImages = processImagesFromDirectory("/home/de/testspark/camPictures/")
+
 	#calcAverage(infoImages)
-	pgservices.insertCameraDatafromList(infoImages)
-	pgservices.createTableAverage()
-	pgservices.insertAverageData()
-	pgservices.selectAverageData()
+	##pgservices.insertCameraDatafromList(infoImages)
+	##pgservices.createTableAverage()
+	##pgservices.insertAverageData()
+	##pgservices.selectAverageData()
 	
 
 
 if __name__ == "__main__":
     main()
-	
- 
-		
-	
-
-
-
-
-

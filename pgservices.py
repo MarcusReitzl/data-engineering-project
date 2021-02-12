@@ -1,6 +1,6 @@
 import psycopg2
 
-
+#TODO Parameter von bis für Zeitraum zur Berechnung der Durchschnittsdaten
 def insertAverageData():
 	try:
 		conn = getConnection()
