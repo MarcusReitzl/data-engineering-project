@@ -10,6 +10,7 @@ public class ExecuteImageDetection implements Serializable {
     public void runPython(byte [] dataKey, String dataValue ) throws IOException {
         String b64 = encodetoBase64(dataKey);
         String[] cmd = {
+                //"spark-submit --master spark://ubuntu:7077 imageProcessingService.py",
                 "python3",
                 //"/home/de/Project/detection.py",
                 "/home/de/Project/imageProcessingService.py",
