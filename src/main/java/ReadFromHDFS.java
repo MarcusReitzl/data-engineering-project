@@ -1,77 +1,39 @@
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
-
-import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 
 
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
 
 
 public class ReadFromHDFS {
 
-    public static void main(String[] args) throws IOException, URISyntaxException {
+    public static void main(String[] args) {
 
         ExecuteImageDetection pyInstance = new ExecuteImageDetection();
         String uri = "hdfs://localhost:9000/monk";
-        Configuration config  = new Configuration();
-        Path path = new Path(uri);
-        SequenceFile.Reader reader = null;
-        //InputStream in = null;
-        FileSystem filesystem = FileSystem.get(new URI(uri), config);
-
-        try{
-            reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(path));
-
-            Text key = new Text();
-            BytesWritable value = new BytesWritable();
-
-            while(reader.next(key, value)){
-                //System.out.println("key: "+key+" value: "+value);
-                byte [] imageAsByteArray = Arrays.copyOf(key.getBytes(), key.getLength());
-                pyInstance.runPython(imageAsByteArray, value.toString());
-                BufferedImage restoredImage = ImageIO.read(new ByteArrayInputStream(imageAsByteArray));
 
 
-                //Thread.sleep(10000);
-                /*
-                Call if u want to see the restored images from hdfs but VM will die
-                 */
-                //showImage(restoredImage);
+        SparkConf conf = new SparkConf().setAppName("ProcessingHistoricalData").setMaster("local[11]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
 
 
-            }
-            //in = filesystem.open(path);
-            //IOUtils.copyBytes(in, System.out, 4096, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            reader.close();
-        }
+        JavaPairRDD<Text, BytesWritable> dataset = sc.sequenceFile(uri,Text.class,BytesWritable.class,10);
+
+        dataset.foreach(tuple -> {
+
+            Text key = tuple._1;
+            BytesWritable value = tuple._2;
+
+            byte [] imageAsByteArray = Arrays.copyOf(value.getBytes(), value.getLength());
+            pyInstance.runPython(imageAsByteArray, key.toString());
+
+        });
+
+
     }
 
-    private static void showImage(BufferedImage restoredImage) {
-        JFrame frame = new JFrame();
-        frame.setSize(300, 300);
-        JLabel label = new JLabel(new ImageIcon(restoredImage));
-        frame.add(label);
-        frame.setVisible(true);
-    }
+
 }
