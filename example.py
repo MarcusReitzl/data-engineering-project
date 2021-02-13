@@ -96,15 +96,15 @@ def calcAverage(infoImages):
 		
 def main():
 	##pgservices.dropTables()
-	##pgservices.createTableInfo()
-	#pgservices.selectTable()
+	#pgservices.createTableInfo()
+	pgservices.selectTable()
 	#pgservices.selectTime()
 
-	infoImages = processImagesFromDirectory("/home/de/testspark/camPictures/")
+	#infoImages = processImagesFromDirectory("/home/de/testspark/camPictures/")
 
 	#calcAverage(infoImages)
 	##pgservices.insertCameraDatafromList(infoImages)
-	##pgservices.createTableAverage()
+	#pgservices.createTableAverage()
 	##pgservices.insertAverageData()
 	##pgservices.selectAverageData()
 	

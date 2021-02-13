@@ -23,7 +23,7 @@ def processImageFromHistoricalData(imgByteArray,filename):
 
 	print(imageInfo)
 		
-	#pgservices.insertCameraData(imageInfo)		
+	pgservices.insertCameraData(imageInfo)		
 	
 def processImageInfoFromLiveData(imgByteArray,camId):
 
@@ -33,7 +33,7 @@ def processImageInfoFromLiveData(imgByteArray,camId):
 
         print(imageInfo)
 
-        #pgservices.insertCameraData(imageInfo)
+        pgservices.insertCameraData(imageInfo)
 
         #TODO Bewerten ob erhoehtes Verkehraufkommen vorliegt
         

@@ -167,7 +167,7 @@ def insertCameraDatafromList(infoImages):
 def getConnection():
 	try:
 	    connect_str = "dbname='trafficdatadb' user='marcus' host='localhost' " + \
-		          "password='pgpw'"
+		          "password='pgdb'"
 	    # use our connection values to establish a connection
 	    conn = psycopg2.connect(connect_str)
 	    return conn
