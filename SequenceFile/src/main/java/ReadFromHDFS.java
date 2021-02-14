@@ -23,7 +23,7 @@ public class ReadFromHDFS {
         sc.addJar("/home/de/IdeaProjects/SequenceFile/out/artifacts/SequenceFile_jar/SequenceFile.jar");
 
 
-        JavaPairRDD<Text, BytesWritable> dataset = sc.sequenceFile(uri,Text.class,BytesWritable.class,4);
+        JavaPairRDD<Text, BytesWritable> dataset = sc.sequenceFile(uri,Text.class,BytesWritable.class,5);
 
       /*  dataset.foreach(tuple -> {
 
